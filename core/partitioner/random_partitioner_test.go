@@ -25,8 +25,8 @@ func TestRandomPartitioner_partition(t *testing.T) {
 			randomPartitioner := &RandomPartitioner{
 				numOfPartitions: tt.fields.numOfPartitions,
 			}
-			if got := randomPartitioner.partition(tt.args.entry); got >= f.numOfPartitions {
-				t.Errorf("partition() = %v, want %v", got, tt.want)
+			if got := randomPartitioner.Partition(tt.args.entry); got >= f.numOfPartitions {
+				t.Errorf("Partition() = %v, want %v", got, tt.want)
 			}
 		})
 	}

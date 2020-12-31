@@ -68,8 +68,8 @@ func TestSecondGroupedTimeBucket_next(t *testing.T) {
 			s := SecondGroupedTimeBucket{
 				numOfSecsForABucket: tt.fields.numOfSecsForABucket,
 			}
-			if got := s.next(tt.args.epochTimestamp); got != tt.want {
-				t.Errorf("next() = %v, want %v", got, tt.want)
+			if got := s.Next(tt.args.epochTimestamp); got != tt.want {
+				t.Errorf("Next() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -95,8 +95,8 @@ func TestSecondGroupedTimeBucket_previous(t *testing.T) {
 			s := SecondGroupedTimeBucket{
 				numOfSecsForABucket: tt.fields.numOfSecsForABucket,
 			}
-			if got := s.previous(tt.args.epochTimestamp); got != tt.want {
-				t.Errorf("previous() = %v, want %v", got, tt.want)
+			if got := s.Previous(tt.args.epochTimestamp); got != tt.want {
+				t.Errorf("Previous() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -122,7 +122,7 @@ func TestSecondGroupedTimeBucket_toBucket(t *testing.T) {
 			s := SecondGroupedTimeBucket{
 				numOfSecsForABucket: tt.fields.numOfSecsForABucket,
 			}
-			if got := s.toBucket(tt.args.epochTimestamp); got != tt.want {
+			if got := s.ToBucket(tt.args.epochTimestamp); got != tt.want {
 				t.Errorf("toBucket() = %v, want %v", got, tt.want)
 			}
 		})

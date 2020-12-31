@@ -12,17 +12,17 @@ func NewSecondGroupedTimeBucket(numOfSecsForABucket int64) *SecondGroupedTimeBuc
 	return &SecondGroupedTimeBucket{numOfSecsForABucket: numOfSecsForABucket}
 }
 
-func (s SecondGroupedTimeBucket) toBucket(epochTimestamp int64) int64 {
+func (s SecondGroupedTimeBucket) ToBucket(epochTimestamp int64) int64 {
 	result := epochTimestamp - (epochTimestamp % (s.numOfSecsForABucket * 1000))
 	return result
 }
 
-func (s SecondGroupedTimeBucket) next(epochTimestamp int64) int64 {
-	result := s.toBucket(epochTimestamp) + (s.numOfSecsForABucket * 1000)
+func (s SecondGroupedTimeBucket) Next(epochTimestamp int64) int64 {
+	result := s.ToBucket(epochTimestamp) + (s.numOfSecsForABucket * 1000)
 	return result
 }
 
-func (s SecondGroupedTimeBucket) previous(epochTimestamp int64) int64 {
-	result := s.toBucket(epochTimestamp) - (s.numOfSecsForABucket * 1000)
+func (s SecondGroupedTimeBucket) Previous(epochTimestamp int64) int64 {
+	result := s.ToBucket(epochTimestamp) - (s.numOfSecsForABucket * 1000)
 	return result
 }

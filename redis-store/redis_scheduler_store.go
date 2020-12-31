@@ -2,7 +2,6 @@ package redis_store
 
 import (
 	"context"
-	"github.com/go-redis/redis/v8"
 	"gronos/core/entry"
 	"strconv"
 )
@@ -13,49 +12,90 @@ var ctx = context.Background()
 
 type RedisSchedulerStore struct {
 	keyPrefix string
+	redis     RedisClient
 }
 
-func (redisSchedulerStore RedisSchedulerStore) KeyPrefix() string {
-	return redisSchedulerStore.keyPrefix
+func (r RedisSchedulerStore) KeyPrefix() string {
+	return r.keyPrefix
 }
 
-func (redisSchedulerStore RedisSchedulerStore) add(schedulerEntry entry.SchedulerEntry, time uint64, partitionNum int64) {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
-	key := redisSchedulerStore.getKey(time, partitionNum)
+func (r *RedisSchedulerStore) Add(schedulerEntry entry.SchedulerEntry, time int64, partitionNum int64) {
+	rdb := r.redis.Client()
+	key := r.getKey(time, partitionNum)
 	rdb.SAdd(ctx, key, schedulerEntry.Key())
-	rdb.Set(ctx, redisSchedulerStore.getPayloadKey(schedulerEntry.Key()), schedulerEntry.Payload(), 0)
+	rdb.Set(ctx, r.getPayloadKey(schedulerEntry.Key()), schedulerEntry.Payload(), 0)
 }
 
-func (redisSchedulerStore RedisSchedulerStore) getPayloadKey(key string) string {
-	prefix := redisSchedulerStore.keyPrefix + DELIMITER
+func (r *RedisSchedulerStore) getPayloadKey(key string) string {
+	prefix := r.keyPrefix + DELIMITER
 	return prefix + key
 }
 
-func (redisSchedulerStore RedisSchedulerStore) getKey(time uint64, partitionNum int64) string {
-	prefix := redisSchedulerStore.keyPrefix + DELIMITER
-	return prefix + strconv.FormatUint(time, 10) + DELIMITER + strconv.FormatInt(partitionNum, 10)
+func (r *RedisSchedulerStore) getKey(time int64, partitionNum int64) string {
+	prefix := r.keyPrefix + DELIMITER
+	return prefix + strconv.FormatInt(time, 10) + DELIMITER + strconv.FormatInt(partitionNum, 10)
 }
 
-func (RedisSchedulerStore) update(entry entry.SchedulerEntry, oldTime uint64, newTime uint64, partitionNum int64) uint64 {
-	panic("implement me")
+func (r *RedisSchedulerStore) Update(entry entry.SchedulerEntry, oldTime int64, newTime int64, partitionNum int64) (bool, error) {
+	rdb := r.redis.Client()
+	oldKey := r.getKey(oldTime, partitionNum)
+	newKey := r.getKey(newTime, partitionNum)
+	result := rdb.SMove(ctx, oldKey, newKey, entry.Key())
+	return result.Val(), nil
 }
 
-func (RedisSchedulerStore) remove(value string, time uint64, partitionNum int64) int64 {
-	panic("implement me")
+func (r *RedisSchedulerStore) remove(value string, time int64, partitionNum int64) int64 {
+	rdb := r.redis.Client()
+	key := r.getKey(time, partitionNum)
+	result := rdb.SRem(ctx, key, value)
+	rdb.Del(ctx, r.getPayloadKey(value))
+	return result.Val()
 }
 
-func (RedisSchedulerStore) get(time uint64, partitionNum int64) []entry.SchedulerEntry {
-	panic("implement me")
+func (r *RedisSchedulerStore) get(time int64, partitionNum int64) []entry.SchedulerEntry {
+	rdb := r.redis.Client()
+	key := r.getKey(time, partitionNum)
+	resultSet := rdb.SMembers(ctx, key)
+	schedulerDataList := r.getSchedulerPayloadValues(partitionNum, resultSet.Val())
+	return schedulerDataList
 }
 
-func (RedisSchedulerStore) getNextN(time uint64, partitionNum int64, n int64) []entry.SchedulerEntry {
-	panic("implement me")
+func (r *RedisSchedulerStore) getSchedulerPayloadValues(partitionNum int64, resultSet []string) []entry.SchedulerEntry {
+	rdb := r.redis.Client()
+	keySet := make(map[string]string)
+	for _, s := range resultSet {
+		keySet[s] = s
+	}
+	var keys = make([]string, len(keySet))
+	var i = 0
+	for k := range keySet {
+		keys[i] = r.getPayloadKey(k)
+		i++
+	}
+	values := rdb.MGet(ctx, keys...).Val()
+	var schedulerDataList = make([]entry.SchedulerEntry, len(resultSet))
+	for idx, key := range keys {
+		value := values[idx].(string)
+		schedulerDataList[idx] = entry.NewDefaultSchedulerEntry(key, value)
+	}
+	return schedulerDataList
 }
 
-func (RedisSchedulerStore) removeBulk() (time uint64, partitionNum int64, values []string) {
-	panic("implement me")
+func (r *RedisSchedulerStore) getNextN(time int64, partitionNum int64, n int64) []entry.SchedulerEntry {
+	rdb := r.redis.Client()
+	key := r.getKey(time, partitionNum)
+	resultSet := rdb.SRandMemberN(ctx, key, n)
+	schedulerDataList := r.getSchedulerPayloadValues(partitionNum, resultSet.Val())
+	return schedulerDataList
+}
+
+func (r *RedisSchedulerStore) RemoveBulk() (time int64, partitionNum int64, values []string) {
+	rdb := r.redis.Client()
+	key := r.getKey(time, partitionNum)
+	pipeline := rdb.Pipeline()
+	for _, value := range values {
+		pipeline.SRem(ctx, key, value)
+		pipeline.Del(ctx, r.getPayloadKey(value))
+	}
+	return
 }
