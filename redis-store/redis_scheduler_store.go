@@ -2,7 +2,6 @@ package redis_store
 
 import (
 	"context"
-	"fmt"
 	"gronos/core/entry"
 	"strconv"
 )
@@ -46,15 +45,15 @@ func (r *RedisSchedulerStore) Update(entry entry.SchedulerEntry, oldTime int64, 
 	return result.Val(), nil
 }
 
-func (r *RedisSchedulerStore) remove(value string, time int64, partitionNum int64) int64 {
+func (r *RedisSchedulerStore) Remove(schedulerEntry entry.SchedulerEntry, time int64, partitionNum int64) (bool, error) {
 	rdb := r.redis.Client()
 	key := r.getKey(time, partitionNum)
-	result := rdb.SRem(ctx, key, value)
-	rdb.Del(ctx, r.getPayloadKey(value))
-	return result.Val()
+	r1, _ := rdb.SRem(ctx, key, schedulerEntry.Key()).Result()
+	r2, _ := rdb.Del(ctx, r.getPayloadKey(schedulerEntry.Key())).Result()
+	return r1 == 1 && r2 == 1, nil
 }
 
-func (r *RedisSchedulerStore) get(time int64, partitionNum int64) []entry.SchedulerEntry {
+func (r *RedisSchedulerStore) Get(time int64, partitionNum int64) []entry.SchedulerEntry {
 	rdb := r.redis.Client()
 	key := r.getKey(time, partitionNum)
 	resultSet := rdb.SMembers(ctx, key)
@@ -81,11 +80,10 @@ func (r *RedisSchedulerStore) getSchedulerPayloadValues(resultSet []string) []en
 		value := values[idx].(string)
 		schedulerDataList[idx] = entry.NewDefaultSchedulerEntry(key, value)
 	}
-	fmt.Printf("val %v \n", schedulerDataList)
 	return schedulerDataList
 }
 
-func (r *RedisSchedulerStore) getNextN(time int64, partitionNum int64, n int64) []entry.SchedulerEntry {
+func (r *RedisSchedulerStore) GetNextN(time int64, partitionNum int64, n int64) []entry.SchedulerEntry {
 	rdb := r.redis.Client()
 	key := r.getKey(time, partitionNum)
 	resultSet := rdb.SRandMemberN(ctx, key, n)
@@ -93,13 +91,13 @@ func (r *RedisSchedulerStore) getNextN(time int64, partitionNum int64, n int64) 
 	return schedulerDataList
 }
 
-func (r *RedisSchedulerStore) RemoveBulk() (time int64, partitionNum int64, values []string) {
+func (r *RedisSchedulerStore) RemoveBulk(schedulerEntries []entry.SchedulerEntry, time int64, partitionNum int64) (bool, error) {
 	rdb := r.redis.Client()
 	key := r.getKey(time, partitionNum)
 	pipeline := rdb.Pipeline()
-	for _, value := range values {
-		pipeline.SRem(ctx, key, value)
-		pipeline.Del(ctx, r.getPayloadKey(value))
+	for _, schedulerEntry := range schedulerEntries {
+		pipeline.SRem(ctx, key, schedulerEntry.Key())
+		pipeline.Del(ctx, r.getPayloadKey(schedulerEntry.Key()))
 	}
-	return
+	return true, nil
 }
