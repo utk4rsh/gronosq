@@ -140,14 +140,13 @@ func TestRedisSchedulerStore_Update(t *testing.T) {
 	oldTime := time.Now().Unix()
 	newTime := time.Now().Unix()
 	a := args{entry: schedulerEntry, oldTime: oldTime, newTime: newTime, partitionNum: 1}
-	expected := true
 	tests := []struct {
 		name   string
 		fields fields
 		args   args
 		want   bool
 	}{
-		{"test_Update", f, a, expected},
+		{"test_Update", f, a, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
