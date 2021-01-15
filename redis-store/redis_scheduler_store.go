@@ -2,6 +2,7 @@ package redis_store
 
 import (
 	"context"
+	"fmt"
 	"gronos/core/entry"
 	"strconv"
 )
@@ -19,11 +20,12 @@ func (r RedisSchedulerStore) KeyPrefix() string {
 	return r.keyPrefix
 }
 
-func (r *RedisSchedulerStore) Add(schedulerEntry entry.SchedulerEntry, time int64, partitionNum int64) {
+func (r *RedisSchedulerStore) Add(schedulerEntry entry.SchedulerEntry, time int64, partitionNum int64) (string, error) {
 	rdb := r.redis.Client()
 	key := r.getKey(time, partitionNum)
 	rdb.SAdd(ctx, key, schedulerEntry.Key())
-	rdb.Set(ctx, r.getPayloadKey(schedulerEntry.Key()), schedulerEntry.Payload(), 0)
+	result, err := rdb.Set(ctx, r.getPayloadKey(schedulerEntry.Key()), schedulerEntry.Payload(), 0).Result()
+	return result, err
 }
 
 func (r *RedisSchedulerStore) getPayloadKey(key string) string {
@@ -56,11 +58,12 @@ func (r *RedisSchedulerStore) get(time int64, partitionNum int64) []entry.Schedu
 	rdb := r.redis.Client()
 	key := r.getKey(time, partitionNum)
 	resultSet := rdb.SMembers(ctx, key)
-	schedulerDataList := r.getSchedulerPayloadValues(partitionNum, resultSet.Val())
+	val, _ := resultSet.Result()
+	schedulerDataList := r.getSchedulerPayloadValues(val)
 	return schedulerDataList
 }
 
-func (r *RedisSchedulerStore) getSchedulerPayloadValues(partitionNum int64, resultSet []string) []entry.SchedulerEntry {
+func (r *RedisSchedulerStore) getSchedulerPayloadValues(resultSet []string) []entry.SchedulerEntry {
 	rdb := r.redis.Client()
 	keySet := make(map[string]string)
 	for _, s := range resultSet {
@@ -72,12 +75,13 @@ func (r *RedisSchedulerStore) getSchedulerPayloadValues(partitionNum int64, resu
 		keys[i] = r.getPayloadKey(k)
 		i++
 	}
-	values := rdb.MGet(ctx, keys...).Val()
+	values, _ := rdb.MGet(ctx, keys...).Result()
 	var schedulerDataList = make([]entry.SchedulerEntry, len(resultSet))
 	for idx, key := range keys {
 		value := values[idx].(string)
 		schedulerDataList[idx] = entry.NewDefaultSchedulerEntry(key, value)
 	}
+	fmt.Printf("val %v \n", schedulerDataList)
 	return schedulerDataList
 }
 
@@ -85,7 +89,7 @@ func (r *RedisSchedulerStore) getNextN(time int64, partitionNum int64, n int64) 
 	rdb := r.redis.Client()
 	key := r.getKey(time, partitionNum)
 	resultSet := rdb.SRandMemberN(ctx, key, n)
-	schedulerDataList := r.getSchedulerPayloadValues(partitionNum, resultSet.Val())
+	schedulerDataList := r.getSchedulerPayloadValues(resultSet.Val())
 	return schedulerDataList
 }
 

@@ -47,10 +47,6 @@ func (s *SchedulerClient) Update(entry entry.SchedulerEntry, oldTime int64, newT
 	if err != nil {
 		return false, err
 	} else {
-		if storeResult != DatastoreNoOperation {
-			return true, nil
-		} else {
-			return false, nil
-		}
+		return storeResult, nil
 	}
 }
