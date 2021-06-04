@@ -1,6 +1,6 @@
 package checkpoint
 
 type CheckPointer interface {
-	peek(partitionNum int64) string
-	set(value string, partitionNum int64)
+	Peek(partitionNum int64) string
+	Set(value string, partitionNum int64)
 }

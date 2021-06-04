@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/client/client.iml" filepath="$PROJECT_DIR$/client/client.iml" />
       <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/gronos.iml" filepath="$PROJECT_DIR$/gronos.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ha-worker/ha-worker.iml" filepath="$PROJECT_DIR$/ha-worker/ha-worker.iml" />
       <module fileurl="file://$PROJECT_DIR$/core/impl.iml" filepath="$PROJECT_DIR$/core/impl.iml" />
       <module fileurl="file://$PROJECT_DIR$/kafka-sink/kafka-sink.iml" filepath="$PROJECT_DIR$/kafka-sink/kafka-sink.iml" />
       <module fileurl="file://$PROJECT_DIR$/redis-store/redis-store.iml" filepath="$PROJECT_DIR$/redis-store/redis-store.iml" />
