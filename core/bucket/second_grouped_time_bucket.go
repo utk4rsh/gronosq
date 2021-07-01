@@ -4,12 +4,12 @@ type SecondGroupedTimeBucket struct {
 	numOfSecsForABucket int64
 }
 
-func (s SecondGroupedTimeBucket) NumOfSecsForABucket() int64 {
-	return s.numOfSecsForABucket
-}
-
 func NewSecondGroupedTimeBucket(numOfSecsForABucket int64) *SecondGroupedTimeBucket {
 	return &SecondGroupedTimeBucket{numOfSecsForABucket: numOfSecsForABucket}
+}
+
+func (s SecondGroupedTimeBucket) NumOfSecsForABucket() int64 {
+	return s.numOfSecsForABucket
 }
 
 func (s SecondGroupedTimeBucket) ToBucket(epochTimestamp int64) int64 {

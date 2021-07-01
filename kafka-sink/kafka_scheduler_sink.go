@@ -12,6 +12,10 @@ type KafkaSchedulerSink struct {
 	kafkaMessage KafkaMessage
 }
 
+func NewKafkaSchedulerSink(producer *kafka.Producer, topic string, kafkaMessage KafkaMessage) *KafkaSchedulerSink {
+	return &KafkaSchedulerSink{producer: producer, topic: topic, kafkaMessage: kafkaMessage}
+}
+
 func (k *KafkaSchedulerSink) GiveExpiredForProcessing(schedulerEntry entry.SchedulerEntry) chan kafka.Event {
 	message := k.kafkaMessage.GetKeyedMessage(k.topic, schedulerEntry)
 	channel := make(chan kafka.Event)

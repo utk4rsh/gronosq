@@ -1,22 +1,17 @@
 package worker
 
 import (
-	"gronos/core/bucket"
-	"gronos/core/checkpoint"
-	"gronos/core/sink"
-	"gronos/core/store"
+	"fmt"
 	"strconv"
 	"time"
 )
 
 type GTask struct {
-	checkPointer   checkpoint.CheckPointer
-	schedulerStore store.SchedulerStore
-	timeBucket     bucket.TimeBucket
-	schedulerSink  sink.SchedulerSink
-	batchSize      int64
-	partitionNum   int64
-	interrupt      bool
+	taskContext TaskContext
+}
+
+func NewGTask(taskContext TaskContext) *GTask {
+	return &GTask{taskContext: taskContext}
 }
 
 func (w *GTask) Start() {
@@ -26,21 +21,23 @@ func (w *GTask) Start() {
 func (w *GTask) worker() {
 	for !w.isInterrupted() {
 		currentTimeInMillis := w.currentTimeInMillis()
-		partitionNum := w.partitionNum
+		partitionNum := w.taskContext.partitionNum
+		batchSize := w.taskContext.batchSize
 		nextIntervalForProcess := w.calculateNextIntervalForProcess(partitionNum)
 		for !w.isInterrupted() && nextIntervalForProcess <= currentTimeInMillis {
-			schedulerEntries := w.schedulerStore.GetNextN(nextIntervalForProcess, partitionNum, w.batchSize)
+			schedulerEntries := w.taskContext.schedulerStore.GetNextN(nextIntervalForProcess, partitionNum, batchSize)
 			for !w.isInterrupted() && len(schedulerEntries) != 0 {
-				w.schedulerSink.GiveExpiredListForProcessing(schedulerEntries)
-				_, _ = w.schedulerStore.RemoveBulk(schedulerEntries, nextIntervalForProcess, partitionNum)
-				schedulerEntries = w.schedulerStore.GetNextN(nextIntervalForProcess, partitionNum, w.batchSize)
+				w.taskContext.schedulerSink.GiveExpiredListForProcessing(schedulerEntries)
+				_, _ = w.taskContext.schedulerStore.RemoveBulk(schedulerEntries, nextIntervalForProcess, partitionNum)
+				schedulerEntries = w.taskContext.schedulerStore.GetNextN(nextIntervalForProcess, partitionNum, batchSize)
+				fmt.Println(schedulerEntries)
 			}
-			w.checkPointer.Set(strconv.FormatInt(nextIntervalForProcess, 10), partitionNum)
-			nextIntervalForProcess = w.timeBucket.Next(nextIntervalForProcess)
+			w.taskContext.checkPointer.Set(strconv.FormatInt(nextIntervalForProcess, 10), partitionNum)
+			nextIntervalForProcess = w.taskContext.timeBucket.Next(nextIntervalForProcess)
 			currentTimeInMillis = w.currentTimeInMillis()
 		}
 		sleepTime := nextIntervalForProcess - currentTimeInMillis
-		time.Sleep(time.Duration(sleepTime))
+		time.Sleep(time.Duration(sleepTime) * time.Millisecond)
 	}
 }
 
@@ -50,17 +47,23 @@ func (w *GTask) currentTimeInMillis() int64 {
 }
 
 func (w *GTask) isInterrupted() bool {
-	return w.interrupt
+	return w.taskContext.interrupt
 }
 
 func (w *GTask) interruptWorker() {
-	w.interrupt = true
+	w.taskContext.interrupt = true
 }
 
 func (w *GTask) calculateNextIntervalForProcess(partitionNum int64) int64 {
-	peek := w.checkPointer.Peek(partitionNum)
-	i, _ := strconv.ParseInt(peek, 10, 64)
-	return w.timeBucket.ToBucket(i)
+	peek := w.taskContext.checkPointer.Peek(partitionNum)
+	if len(peek) != 0 {
+		i, _ := strconv.ParseInt(peek, 10, 64)
+		return w.taskContext.timeBucket.ToBucket(i)
+	} else {
+		currentTime := w.currentTimeInMillis() - 1000*10
+		w.taskContext.checkPointer.Set(strconv.FormatInt(currentTime, 10), partitionNum)
+		return currentTime
+	}
 }
 
 func (w *GTask) Stop() {

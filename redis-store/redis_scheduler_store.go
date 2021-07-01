@@ -2,7 +2,9 @@ package redis_store
 
 import (
 	"context"
+	"fmt"
 	"gronos/core/entry"
+	"gronos/core/redis"
 	"strconv"
 )
 
@@ -12,7 +14,11 @@ var ctx = context.Background()
 
 type RedisSchedulerStore struct {
 	keyPrefix string
-	redis     RedisClient
+	redis     redis.RedisClient
+}
+
+func NewRedisSchedulerStore(keyPrefix string, redis redis.RedisClient) *RedisSchedulerStore {
+	return &RedisSchedulerStore{keyPrefix: keyPrefix, redis: redis}
 }
 
 func (r RedisSchedulerStore) KeyPrefix() string {
@@ -22,7 +28,8 @@ func (r RedisSchedulerStore) KeyPrefix() string {
 func (r *RedisSchedulerStore) Add(schedulerEntry entry.SchedulerEntry, time int64, partitionNum int64) (string, error) {
 	rdb := r.redis.Client()
 	key := r.getKey(time, partitionNum)
-	rdb.SAdd(ctx, key, schedulerEntry.Key())
+	add := rdb.SAdd(ctx, key, schedulerEntry.Key())
+	fmt.Println("Added ", add, key)
 	result, err := rdb.Set(ctx, r.getPayloadKey(schedulerEntry.Key()), schedulerEntry.Payload(), 0).Result()
 	return result, err
 }

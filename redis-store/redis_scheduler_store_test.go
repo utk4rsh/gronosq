@@ -1,6 +1,7 @@
 package redis_store
 
 import (
+	redis2 "gronos/core/redis"
 	"gronos/core/entry"
 	"reflect"
 	"strconv"
@@ -11,14 +12,14 @@ import (
 func TestRedisSchedulerStore_Add(t *testing.T) {
 	type fields struct {
 		keyPrefix string
-		redis     RedisClient
+		redis     redis2.RedisClient
 	}
 	type args struct {
 		schedulerEntry entry.SchedulerEntry
 		time           int64
 		partitionNum   int64
 	}
-	f := fields{keyPrefix: "test_prefix", redis: RedisClient{}}
+	f := fields{keyPrefix: "test_prefix", redis: redis2.RedisClient{}}
 	schedulerEntry := entry.NewDefaultSchedulerEntry("key", "payload")
 	uTime := time.Now().Unix()
 	a := args{schedulerEntry: schedulerEntry, time: uTime, partitionNum: 1}
@@ -57,10 +58,10 @@ func TestRedisSchedulerStore_Add(t *testing.T) {
 func TestRedisSchedulerStore_KeyPrefix(t *testing.T) {
 	type fields struct {
 		keyPrefix string
-		redis     RedisClient
+		redis     redis2.RedisClient
 	}
 	wantedKeyPrefix := "keyPrefix"
-	f := fields{keyPrefix: wantedKeyPrefix, redis: RedisClient{}}
+	f := fields{keyPrefix: wantedKeyPrefix, redis: redis2.RedisClient{}}
 	tests := []struct {
 		name   string
 		fields fields
@@ -84,14 +85,14 @@ func TestRedisSchedulerStore_KeyPrefix(t *testing.T) {
 func TestRedisSchedulerStore_RemoveBulk(t *testing.T) {
 	type fields struct {
 		keyPrefix string
-		redis     RedisClient
+		redis     redis2.RedisClient
 	}
 	type args struct {
 		entries      []entry.SchedulerEntry
 		time         int64
 		partitionNum int64
 	}
-	f := fields{keyPrefix: "test_prefix", redis: RedisClient{}}
+	f := fields{keyPrefix: "test_prefix", redis: redis2.RedisClient{}}
 	schedulerEntry := entry.NewDefaultSchedulerEntry("key", "payload")
 	entries := []entry.SchedulerEntry{schedulerEntry}
 	uTime := time.Now().Unix()
@@ -127,7 +128,7 @@ func TestRedisSchedulerStore_RemoveBulk(t *testing.T) {
 func TestRedisSchedulerStore_Update(t *testing.T) {
 	type fields struct {
 		keyPrefix string
-		redis     RedisClient
+		redis     redis2.RedisClient
 	}
 	type args struct {
 		entry        entry.SchedulerEntry
@@ -135,7 +136,7 @@ func TestRedisSchedulerStore_Update(t *testing.T) {
 		newTime      int64
 		partitionNum int64
 	}
-	f := fields{keyPrefix: "test_prefix", redis: RedisClient{}}
+	f := fields{keyPrefix: "test_prefix", redis: redis2.RedisClient{}}
 	schedulerEntry := entry.NewDefaultSchedulerEntry("key", "payload")
 	oldTime := time.Now().Unix()
 	newTime := time.Now().Unix()
@@ -165,14 +166,14 @@ func TestRedisSchedulerStore_Update(t *testing.T) {
 func TestRedisSchedulerStore_getKey(t *testing.T) {
 	type fields struct {
 		keyPrefix string
-		redis     RedisClient
+		redis     redis2.RedisClient
 	}
 	type args struct {
 		time         int64
 		partitionNum int64
 	}
 	prefix := "prefix"
-	f := fields{keyPrefix: prefix, redis: RedisClient{}}
+	f := fields{keyPrefix: prefix, redis: redis2.RedisClient{}}
 	uTime := time.Now().Unix()
 	var partitionNum int64 = 1
 	a := args{time: uTime, partitionNum: partitionNum}
@@ -201,14 +202,14 @@ func TestRedisSchedulerStore_getKey(t *testing.T) {
 func TestRedisSchedulerStore_getNextN(t *testing.T) {
 	type fields struct {
 		keyPrefix string
-		redis     RedisClient
+		redis     redis2.RedisClient
 	}
 	type args struct {
 		time         int64
 		partitionNum int64
 		n            int64
 	}
-	f := fields{keyPrefix: "test_prefix", redis: RedisClient{}}
+	f := fields{keyPrefix: "test_prefix", redis: redis2.RedisClient{}}
 	schedulerEntry := entry.NewDefaultSchedulerEntry("key", "payload")
 	uTime := time.Now().Unix()
 	a := args{time: uTime, partitionNum: 1, n: 5}
@@ -243,7 +244,7 @@ func TestRedisSchedulerStore_getNextN(t *testing.T) {
 func TestRedisSchedulerStore_getPayloadKey(t *testing.T) {
 	type fields struct {
 		keyPrefix string
-		redis     RedisClient
+		redis     redis2.RedisClient
 	}
 	type args struct {
 		key string
@@ -277,14 +278,14 @@ func TestRedisSchedulerStore_getPayloadKey(t *testing.T) {
 func TestRedisSchedulerStore_Remove(t *testing.T) {
 	type fields struct {
 		keyPrefix string
-		redis     RedisClient
+		redis     redis2.RedisClient
 	}
 	type args struct {
 		schedulerEntry entry.SchedulerEntry
 		time           int64
 		partitionNum   int64
 	}
-	f := fields{keyPrefix: "test_prefix", redis: RedisClient{}}
+	f := fields{keyPrefix: "test_prefix", redis: redis2.RedisClient{}}
 	schedulerEntry := entry.NewDefaultSchedulerEntry("key", "payload")
 	entries := []entry.SchedulerEntry{schedulerEntry}
 	uTime := time.Now().Unix()

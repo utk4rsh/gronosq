@@ -46,20 +46,6 @@ func TestKafkaSchedulerSink_GiveExpiredForProcessing(t *testing.T) {
 	producer.Close()
 }
 
-type SimpleKafkaMessage struct {
-}
-
-func NewSimpleKafkaMessage() *SimpleKafkaMessage {
-	return &SimpleKafkaMessage{}
-}
-
-func (s *SimpleKafkaMessage) GetKeyedMessage(topic string, schedulerEntry entry.SchedulerEntry) kafka.Message {
-	return kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-		Key:            []byte(schedulerEntry.Key()),
-		Value:          []byte(schedulerEntry.Payload())}
-}
-
 func TestKafkaSchedulerSink_GiveExpiredListForProcessing(t *testing.T) {
 	producer, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost"})
 	if err != nil {
