@@ -4,6 +4,7 @@ import (
 	"context"
 	"gronos/core/redis"
 	"strconv"
+	"time"
 )
 
 const DELIMITER = "_"
@@ -12,10 +13,10 @@ var ctx = context.Background()
 
 type RedisCheckPointer struct {
 	keyPrefix string
-	redis     redis.RedisClient
+	redis     redis.Client
 }
 
-func NewRedisCheckPointer(keyPrefix string, redis redis.RedisClient) *RedisCheckPointer {
+func NewRedisCheckPointer(keyPrefix string, redis redis.Client) *RedisCheckPointer {
 	return &RedisCheckPointer{keyPrefix: keyPrefix, redis: redis}
 }
 
@@ -30,7 +31,7 @@ func (r *RedisCheckPointer) Peek(partitionNum int64) string {
 func (r *RedisCheckPointer) Set(value string, partitionNum int64) {
 	rdb := r.redis.Client()
 	key := r.getKey(r.keyPrefix, partitionNum)
-	rdb.Set(ctx, key, value, 0)
+	rdb.Set(ctx, key, value, time.Duration(60)*time.Millisecond)
 }
 
 func (r *RedisCheckPointer) getKey(timerKeyPrefix string, partitionNum int64) string {

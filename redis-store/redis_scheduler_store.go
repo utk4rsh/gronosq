@@ -14,10 +14,10 @@ var ctx = context.Background()
 
 type RedisSchedulerStore struct {
 	keyPrefix string
-	redis     redis.RedisClient
+	redis     redis.Client
 }
 
-func NewRedisSchedulerStore(keyPrefix string, redis redis.RedisClient) *RedisSchedulerStore {
+func NewRedisSchedulerStore(keyPrefix string, redis redis.Client) *RedisSchedulerStore {
 	return &RedisSchedulerStore{keyPrefix: keyPrefix, redis: redis}
 }
 
@@ -94,6 +94,7 @@ func (r *RedisSchedulerStore) GetNextN(time int64, partitionNum int64, n int64) 
 	rdb := r.redis.Client()
 	key := r.getKey(time, partitionNum)
 	resultSet := rdb.SRandMemberN(ctx, key, n)
+	fmt.Println(resultSet)
 	schedulerDataList := r.getSchedulerPayloadValues(resultSet.Val())
 	return schedulerDataList
 }

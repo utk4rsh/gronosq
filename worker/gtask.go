@@ -7,11 +7,12 @@ import (
 )
 
 type GTask struct {
-	taskContext TaskContext
+	taskContext  TaskContext
+	partitionNum int64
 }
 
-func NewGTask(taskContext TaskContext) *GTask {
-	return &GTask{taskContext: taskContext}
+func NewGTask(taskContext TaskContext, partitionNum int64) *GTask {
+	return &GTask{taskContext: taskContext, partitionNum: partitionNum}
 }
 
 func (w *GTask) Start() {
@@ -20,30 +21,28 @@ func (w *GTask) Start() {
 
 func (w *GTask) worker() {
 	for !w.isInterrupted() {
-		currentTimeInMillis := w.currentTimeInMillis()
-		partitionNum := w.taskContext.partitionNum
+		partitionNum := w.partitionNum
 		batchSize := w.taskContext.batchSize
 		nextIntervalForProcess := w.calculateNextIntervalForProcess(partitionNum)
-		for !w.isInterrupted() && nextIntervalForProcess <= currentTimeInMillis {
+		for !w.isInterrupted() && nextIntervalForProcess <= w.currentTimeInMillis() {
 			schedulerEntries := w.taskContext.schedulerStore.GetNextN(nextIntervalForProcess, partitionNum, batchSize)
+			fmt.Println("schedulerEntries", schedulerEntries)
 			for !w.isInterrupted() && len(schedulerEntries) != 0 {
 				w.taskContext.schedulerSink.GiveExpiredListForProcessing(schedulerEntries)
 				_, _ = w.taskContext.schedulerStore.RemoveBulk(schedulerEntries, nextIntervalForProcess, partitionNum)
 				schedulerEntries = w.taskContext.schedulerStore.GetNextN(nextIntervalForProcess, partitionNum, batchSize)
-				fmt.Println(schedulerEntries)
 			}
 			w.taskContext.checkPointer.Set(strconv.FormatInt(nextIntervalForProcess, 10), partitionNum)
 			nextIntervalForProcess = w.taskContext.timeBucket.Next(nextIntervalForProcess)
-			currentTimeInMillis = w.currentTimeInMillis()
 		}
-		sleepTime := nextIntervalForProcess - currentTimeInMillis
+		sleepTime := nextIntervalForProcess - w.currentTimeInMillis()
+		fmt.Println("sleepTime", sleepTime)
 		time.Sleep(time.Duration(sleepTime) * time.Millisecond)
 	}
 }
 
 func (w *GTask) currentTimeInMillis() int64 {
-	nano := time.Now().Unix()
-	return nano
+	return time.Now().UnixNano() / int64(time.Millisecond)
 }
 
 func (w *GTask) isInterrupted() bool {

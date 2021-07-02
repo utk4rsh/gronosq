@@ -21,7 +21,7 @@ func (randomPartitioner *RandomPartitioner) GetNumberOfPartitions() int64 {
 }
 
 func (randomPartitioner *RandomPartitioner) Partition(entry string) int64 {
-	nano := time.Now().Unix()
+	nano := time.Now().UnixNano()
 	partition := nano % randomPartitioner.numOfPartitions
 	return partition
 }

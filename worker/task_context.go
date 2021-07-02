@@ -13,10 +13,9 @@ type TaskContext struct {
 	timeBucket     bucket.TimeBucket
 	schedulerSink  sink.SchedulerSink
 	batchSize      int64
-	partitionNum   int64
 	interrupt      bool
 }
 
-func NewTaskContext(checkPointer checkpoint.CheckPointer, schedulerStore store.SchedulerStore, timeBucket bucket.TimeBucket, schedulerSink sink.SchedulerSink, batchSize int64, partitionNum int64, interrupt bool) *TaskContext {
-	return &TaskContext{checkPointer: checkPointer, schedulerStore: schedulerStore, timeBucket: timeBucket, schedulerSink: schedulerSink, batchSize: batchSize, partitionNum: partitionNum, interrupt: interrupt}
+func NewTaskContext(checkPointer checkpoint.CheckPointer, schedulerStore store.SchedulerStore, timeBucket bucket.TimeBucket, schedulerSink sink.SchedulerSink, batchSize int64, interrupt bool) *TaskContext {
+	return &TaskContext{checkPointer: checkPointer, schedulerStore: schedulerStore, timeBucket: timeBucket, schedulerSink: schedulerSink, batchSize: batchSize, interrupt: interrupt}
 }

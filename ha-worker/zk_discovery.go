@@ -3,38 +3,41 @@ package ha_worker
 import (
 	"github.com/samuel/go-zookeeper/zk"
 	log "github.com/sirupsen/logrus"
-	"strings"
-	"time"
+	zkClient "gronos/core/zk"
 )
 
 type ZKDiscovery struct {
-	ZKHosts string
-	ZKPath  string
-	zk      *zk.Conn
+	zk *zk.Conn
 }
 
-func (s *ZKDiscovery) AddListener(onChange func(children []string)) error {
+func NewZKDiscovery(client zkClient.Client) *ZKDiscovery {
+	return &ZKDiscovery{zk: client.Client()}
+}
+
+func (s *ZKDiscovery) CreatePersistentEphemeralNode(path string, instanceId string) error {
 	var err error
-	s.zk, _, err = zk.Connect(strings.Split(s.ZKHosts, ","), 5*time.Second)
+	create, err := s.zk.Create(path, []byte(instanceId), 1, nil)
 	if err != nil {
-		log.Printf("Error in zk.Connect (%s): %v", s.ZKHosts, err)
-		panic(err)
+		return err
 	}
-	dumpChildren, stat, _, err := s.zk.ChildrenW(s.ZKPath)
+	log.Printf("ZK Created for instance id : %+v Stat: %+v", instanceId, create)
+	return nil
+}
+
+func (s *ZKDiscovery) AddListener(zkPath string, onChange func(children []string)) error {
+	var err error
+	dumpChildren, stat, _, err := s.zk.ChildrenW(zkPath)
 	if err != nil {
 		panic(err)
 	}
 	log.Printf("ZK Childrens : %+v Stat: %+v", dumpChildren, stat)
-	go WatchChildren(s.zk, s.ZKPath, onChange)
+	go WatchChildren(s.zk, zkPath, onChange)
 	return nil
 }
 
-func (s *ZKDiscovery) GetChildren() []string {
-	dumpChildren, _, _, err := s.zk.ChildrenW(s.ZKPath)
-	if err != nil {
-		panic(err)
-	}
-	return dumpChildren
+func (s *ZKDiscovery) GetChildren(path string) ([]string, error) {
+	dumpChildren, _, _, err := s.zk.ChildrenW(path)
+	return dumpChildren, err
 }
 
 func WatchChildren(conn *zk.Conn, zkPath string, onChange func(children []string)) {
