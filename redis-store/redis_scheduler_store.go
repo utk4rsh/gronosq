@@ -2,6 +2,7 @@ package redis_store
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-redis/redis/v8"
 	"gronos/core/entry"
 	"strconv"
@@ -71,19 +72,20 @@ func (r *RedisSchedulerStore) getSchedulerPayloadValues(resultSet []string) []en
 	rdb := r.redis
 	keySet := make(map[string]string)
 	for _, s := range resultSet {
-		keySet[s] = s
+		keySet[s] = r.getPayloadKey(s)
 	}
 	var keys = make([]string, len(keySet))
 	var i = 0
-	for k := range keySet {
-		keys[i] = r.getPayloadKey(k)
+	for _, v := range keySet {
+		keys[i] = v
 		i++
 	}
 	values, _ := rdb.MGet(ctx, keys...).Result()
 	var schedulerDataList = make([]entry.SchedulerEntry, len(resultSet))
-	for idx, key := range keys {
+	var idx = 0
+	for k := range keySet {
 		value := values[idx].(string)
-		schedulerDataList[idx] = entry.NewDefaultSchedulerEntry(key, value)
+		schedulerDataList[idx] = entry.NewDefaultSchedulerEntry(k, value)
 	}
 	return schedulerDataList
 }
@@ -101,8 +103,11 @@ func (r *RedisSchedulerStore) RemoveBulk(schedulerEntries []entry.SchedulerEntry
 	key := r.getKey(time, partitionNum)
 	pipeline := rdb.Pipeline()
 	for _, schedulerEntry := range schedulerEntries {
-		pipeline.SRem(ctx, key, schedulerEntry.Key())
-		pipeline.Del(ctx, r.getPayloadKey(schedulerEntry.Key()))
+		entryKey := schedulerEntry.Key()
+		payloadKey := r.getPayloadKey(schedulerEntry.Key())
+		pipeline.SRem(ctx, key, entryKey)
+		pipeline.Del(ctx, payloadKey)
+		fmt.Println("Removing entry & payload key", entryKey, payloadKey)
 	}
 	_, err := pipeline.Exec(ctx)
 	if err != nil {
