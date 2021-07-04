@@ -16,17 +16,14 @@ func NewGTask(taskContext TaskContext, partitionNum int64) *GTask {
 }
 
 func (w *GTask) Start() {
-	go w.worker()
-}
-
-func (w *GTask) worker() {
 	for !w.isInterrupted() {
 		partitionNum := w.partitionNum
 		batchSize := w.taskContext.batchSize
 		nextIntervalForProcess := w.calculateNextIntervalForProcess(partitionNum)
+		fmt.Println("Current epoch ", w.currentTimeInMillis(), ", Next run at ", nextIntervalForProcess)
 		for !w.isInterrupted() && nextIntervalForProcess <= w.currentTimeInMillis() {
 			schedulerEntries := w.taskContext.schedulerStore.GetNextN(nextIntervalForProcess, partitionNum, batchSize)
-			fmt.Println("schedulerEntries", schedulerEntries)
+			fmt.Println("Processing", schedulerEntries)
 			for !w.isInterrupted() && len(schedulerEntries) != 0 {
 				w.taskContext.schedulerSink.GiveExpiredListForProcessing(schedulerEntries)
 				_, _ = w.taskContext.schedulerStore.RemoveBulk(schedulerEntries, nextIntervalForProcess, partitionNum)
@@ -36,7 +33,7 @@ func (w *GTask) worker() {
 			nextIntervalForProcess = w.taskContext.timeBucket.Next(nextIntervalForProcess)
 		}
 		sleepTime := nextIntervalForProcess - w.currentTimeInMillis()
-		fmt.Println("sleepTime", sleepTime)
+		fmt.Println("Current epoch ", w.currentTimeInMillis(), ", Next run at ", nextIntervalForProcess, "sleeping for ", sleepTime)
 		time.Sleep(time.Duration(sleepTime) * time.Millisecond)
 	}
 }

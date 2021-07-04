@@ -2,7 +2,7 @@ package checkpoint
 
 import (
 	"context"
-	"gronos/core/redis"
+	"github.com/go-redis/redis/v8"
 	"strconv"
 	"time"
 )
@@ -13,15 +13,15 @@ var ctx = context.Background()
 
 type RedisCheckPointer struct {
 	keyPrefix string
-	redis     redis.Client
+	redis     *redis.Client
 }
 
-func NewRedisCheckPointer(keyPrefix string, redis redis.Client) *RedisCheckPointer {
+func NewRedisCheckPointer(keyPrefix string, redis *redis.Client) *RedisCheckPointer {
 	return &RedisCheckPointer{keyPrefix: keyPrefix, redis: redis}
 }
 
 func (r *RedisCheckPointer) Peek(partitionNum int64) string {
-	rdb := r.redis.Client()
+	rdb := r.redis
 	key := r.getKey(r.keyPrefix, partitionNum)
 	resultSet := rdb.Get(ctx, key)
 	val, _ := resultSet.Result()
@@ -29,7 +29,7 @@ func (r *RedisCheckPointer) Peek(partitionNum int64) string {
 }
 
 func (r *RedisCheckPointer) Set(value string, partitionNum int64) {
-	rdb := r.redis.Client()
+	rdb := r.redis
 	key := r.getKey(r.keyPrefix, partitionNum)
 	rdb.Set(ctx, key, value, time.Duration(60)*time.Millisecond)
 }

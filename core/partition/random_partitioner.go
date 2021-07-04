@@ -12,16 +12,16 @@ func NewRandomPartitioner(numOfPartitions int64) *RandomPartitioner {
 	return &RandomPartitioner{numOfPartitions: numOfPartitions}
 }
 
-func (randomPartitioner RandomPartitioner) NumOfPartitions() int64 {
-	return randomPartitioner.numOfPartitions
+func (r *RandomPartitioner) NumOfPartitions() int64 {
+	return r.numOfPartitions
 }
 
-func (randomPartitioner *RandomPartitioner) GetNumberOfPartitions() int64 {
-	return randomPartitioner.numOfPartitions
+func (r *RandomPartitioner) GetNumberOfPartitions() int64 {
+	return r.numOfPartitions
 }
 
-func (randomPartitioner *RandomPartitioner) Partition(entry string) int64 {
+func (r *RandomPartitioner) Partition(entry string) int64 {
 	nano := time.Now().UnixNano()
-	partition := nano % randomPartitioner.numOfPartitions
+	partition := nano % r.numOfPartitions
 	return partition
 }

@@ -16,8 +16,10 @@ func NewZKDiscovery(client zkClient.Client) *ZKDiscovery {
 
 func (s *ZKDiscovery) CreatePersistentEphemeralNode(path string, instanceId string) error {
 	var err error
-	create, err := s.zk.Create(path, []byte(instanceId), 1, nil)
+	completePath := path + "/" + instanceId
+	create, err := s.zk.Create(completePath, []byte(instanceId), 1, zk.WorldACL(zk.PermAll))
 	if err != nil {
+		log.Printf("Could not create node for instance id : %+v Stat: %+v", instanceId, create)
 		return err
 	}
 	log.Printf("ZK Created for instance id : %+v Stat: %+v", instanceId, create)

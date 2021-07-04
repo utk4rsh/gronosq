@@ -1,0 +1,14 @@
+commonConfig:
+  prefix: "gronos"
+  batchSize: 100
+kafkaConfig:
+  brokers: "localhost"
+  topic: "ktopic-gronos"
+  group: "kgroup-gronos"
+zooKeeperConfig:
+  servers: "localhost:2181"
+  zkPath: "/ha-nodes"
+redisConfig:
+  servers: "localhost:6379"
+  password: ""
+  database: 0
