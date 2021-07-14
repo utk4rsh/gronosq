@@ -38,12 +38,12 @@ func startTask() {
 	taskContext := worker.NewTaskContext(checkPointer, schedulerStore, timeBucket, schedulerSink, int64(batchSize), false)
 	zkDiscovery := haworker.NewZKDiscovery(zkClient)
 	name, _ := os.Hostname()
-	taskDistributor := haworker.NewZkTaskDistributor(zkPrefix, 2, name, zkDiscovery)
+	taskDistributor := haworker.NewZkTaskDistributor(zkPrefix, 2, name+"-11", zkDiscovery)
 	workerManager := haworker.NewWorkerManager(taskDistributor, worker.TaskFactory{}, taskContext)
 	workerManager.Start()
 }
 
 func main() {
-	go startTask()
+	startTask()
 	select {} // block forever
 }
