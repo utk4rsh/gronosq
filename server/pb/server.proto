@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "gronosq/server/pb";
+option go_package = "server/pb";
 
 package server;
 

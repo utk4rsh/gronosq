@@ -1,36 +1,52 @@
 package main
 
 import (
-	"context"
-	"google.golang.org/grpc"
+	"flag"
+	"go.uber.org/yarpc/api/transport"
+	"go.uber.org/zap"
 	"gronosq/server/pb"
+	"gronosq/server/utils"
 	"log"
-	"net"
+	"os"
 )
 
-const (
-	port = ":50051"
+var (
+	flagSet = flag.NewFlagSet("protobuf", flag.ExitOnError)
 )
-
-// server is used to implement helloworld.GreeterServer.
-type server struct {
-	pb.UnimplementedSchedulerServer
-}
-
-func (s *server) Add(ctx context.Context, in *pb.SchedulerEntryRequest) (*pb.SchedulerResponse, error) {
-	log.Printf("Received: %v", in.GetKey())
-	return &pb.SchedulerResponse{Message: "Hello " + in.GetKey()}, nil
-}
 
 func main() {
-	lis, err := net.Listen("tcp", port)
+	if err := flagSet.Parse(os.Args[1:]); err != nil {
+		log.Fatal(err)
+	}
+	if err := do(); err != nil {
+		log.Fatal(err)
+	}
+	select {}
+}
+
+func do() error {
+	return run()
+}
+
+func run() error {
+	keyValueYARPCServer := pb.NewSchedulerServerInstance()
+	logger, err := zap.NewDevelopment()
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		return err
 	}
-	s := grpc.NewServer()
-	pb.RegisterSchedulerServer(s, &server{})
-	log.Printf("server listening at %v", lis.Addr())
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	return WithClients(
+		keyValueYARPCServer,
+		logger,
+	)
+}
+
+func WithClients(
+	keyValueYARPCServer pb.SchedulerYARPCServer,
+	logger *zap.Logger,
+) error {
+	var procedures []transport.Procedure
+	if keyValueYARPCServer != nil {
+		procedures = append(procedures, pb.BuildSchedulerYARPCProcedures(keyValueYARPCServer)...)
 	}
+	return utils.WithClientInfo("example", procedures, utils.TransportTypeGRPC, logger)
 }

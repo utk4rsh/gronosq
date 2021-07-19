@@ -1,3 +1,5 @@
+#!/bin/bash
+
 set -euo pipefail
 
 DIR="$(cd "$(dirname "${0}")/../.." && pwd)"
@@ -19,14 +21,16 @@ generate_stringer() {
   stringer "-type=${1}" "${2}"
 }
 
-GOGO_PROTO_DIR=$(go mod download -json github.com/gogo/protobuf | jq -r .Dir)
-
+GOGO_PROTO_DIR="/Users/utkarsh.s/Utkarsh/pkg/mod/github.com/gogo/protobuf@v1.3.1"
 
 protoc_all() {
   protoc_go_grpc $@
   protoc_yarpc_go $@
 }
 
+protoc_yarpc_go() {
+  protoc_with_imports "yarpc-go" "" $@
+}
 
 protoc_go() {
   protoc_with_imports "gogoslick" "" $@
@@ -40,8 +44,9 @@ protoc_with_imports() {
   protoc \
     -I "$GOGO_PROTO_DIR/protobuf" \
     -I . \
+    -I "/Users/utkarsh.s/Utkarsh/git/gronosq/server/pb" \
     "--${1}_out=${2}Mgoogle/protobuf/descriptor.proto=github.com/gogo/protobuf/protoc-gen-gogo/descriptor,Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,Mgogoproto/gogo.proto=github.com/gogo/protobuf/gogoproto,Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types:." \
-  "${@:3}"
+    "${@:3}"
 }
 
 protoc_all /Users/utkarsh.s/Utkarsh/git/gronosq/server/pb/server.proto
