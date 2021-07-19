@@ -1,8 +1,8 @@
 package redis_store
 
 import (
-	"gronos/core/entry"
-	redis2 "gronos/core/rdb"
+	"gronosq/core/entry"
+	"gronosq/core/rdb"
 	"reflect"
 	"strconv"
 	"testing"
@@ -12,14 +12,14 @@ import (
 func TestRedisSchedulerStore_Add(t *testing.T) {
 	type fields struct {
 		keyPrefix string
-		redis     redis2.Client
+		redis     rdb.Client
 	}
 	type args struct {
 		schedulerEntry entry.SchedulerEntry
 		time           int64
 		partitionNum   int64
 	}
-	f := fields{keyPrefix: "test_prefix", redis: redis2.Client{}}
+	f := fields{keyPrefix: "test_prefix", redis: rdb.Client{}}
 	schedulerEntry := entry.NewDefaultSchedulerEntry("key", "payload")
 	uTime := time.Now().UnixNano() / int64(time.Millisecond)
 	a := args{schedulerEntry: schedulerEntry, time: uTime, partitionNum: 1}
@@ -35,7 +35,7 @@ func TestRedisSchedulerStore_Add(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := &RedisSchedulerStore{
 				keyPrefix: tt.fields.keyPrefix,
-				redis:     tt.fields.redis,
+				redis:     tt.fields.redis.Get(),
 			}
 			result, err := r.Add(tt.args.schedulerEntry, tt.args.time, tt.args.partitionNum)
 			if err != nil {
@@ -58,10 +58,10 @@ func TestRedisSchedulerStore_Add(t *testing.T) {
 func TestRedisSchedulerStore_KeyPrefix(t *testing.T) {
 	type fields struct {
 		keyPrefix string
-		redis     redis2.Client
+		redis     rdb.Client
 	}
 	wantedKeyPrefix := "keyPrefix"
-	f := fields{keyPrefix: wantedKeyPrefix, redis: redis2.Client{}}
+	f := fields{keyPrefix: wantedKeyPrefix, redis: rdb.Client{}}
 	tests := []struct {
 		name   string
 		fields fields
@@ -85,14 +85,14 @@ func TestRedisSchedulerStore_KeyPrefix(t *testing.T) {
 func TestRedisSchedulerStore_RemoveBulk(t *testing.T) {
 	type fields struct {
 		keyPrefix string
-		redis     redis2.Client
+		redis     rdb.Client
 	}
 	type args struct {
 		entries      []entry.SchedulerEntry
 		time         int64
 		partitionNum int64
 	}
-	f := fields{keyPrefix: "test_prefix", redis: redis2.Client{}}
+	f := fields{keyPrefix: "test_prefix", redis: rdb.Client{}}
 	schedulerEntry := entry.NewDefaultSchedulerEntry("key", "payload")
 	entries := []entry.SchedulerEntry{schedulerEntry}
 	uTime := time.Now().UnixNano() / int64(time.Millisecond)
@@ -128,7 +128,7 @@ func TestRedisSchedulerStore_RemoveBulk(t *testing.T) {
 func TestRedisSchedulerStore_Update(t *testing.T) {
 	type fields struct {
 		keyPrefix string
-		redis     redis2.Client
+		redis     rdb.Client
 	}
 	type args struct {
 		entry        entry.SchedulerEntry
@@ -136,7 +136,7 @@ func TestRedisSchedulerStore_Update(t *testing.T) {
 		newTime      int64
 		partitionNum int64
 	}
-	f := fields{keyPrefix: "test_prefix", redis: redis2.Client{}}
+	f := fields{keyPrefix: "test_prefix", redis: rdb.Client{}}
 	schedulerEntry := entry.NewDefaultSchedulerEntry("key", "payload")
 	oldTime := time.Now().UnixNano() / int64(time.Millisecond)
 	newTime := time.Now().UnixNano() / int64(time.Millisecond)
@@ -166,14 +166,14 @@ func TestRedisSchedulerStore_Update(t *testing.T) {
 func TestRedisSchedulerStore_getKey(t *testing.T) {
 	type fields struct {
 		keyPrefix string
-		redis     redis2.Client
+		redis     rdb.Client
 	}
 	type args struct {
 		time         int64
 		partitionNum int64
 	}
 	prefix := "prefix"
-	f := fields{keyPrefix: prefix, redis: redis2.Client{}}
+	f := fields{keyPrefix: prefix, redis: rdb.Client{}}
 	uTime := time.Now().UnixNano() / int64(time.Millisecond)
 	var partitionNum int64 = 1
 	a := args{time: uTime, partitionNum: partitionNum}
@@ -202,14 +202,14 @@ func TestRedisSchedulerStore_getKey(t *testing.T) {
 func TestRedisSchedulerStore_getNextN(t *testing.T) {
 	type fields struct {
 		keyPrefix string
-		redis     redis2.Client
+		redis     rdb.Client
 	}
 	type args struct {
 		time         int64
 		partitionNum int64
 		n            int64
 	}
-	f := fields{keyPrefix: "test_prefix", redis: redis2.Client{}}
+	f := fields{keyPrefix: "test_prefix", redis: rdb.Client{}}
 	schedulerEntry := entry.NewDefaultSchedulerEntry("key", "payload")
 	uTime := time.Now().UnixNano() / int64(time.Millisecond)
 	a := args{time: uTime, partitionNum: 1, n: 5}
@@ -244,7 +244,7 @@ func TestRedisSchedulerStore_getNextN(t *testing.T) {
 func TestRedisSchedulerStore_getPayloadKey(t *testing.T) {
 	type fields struct {
 		keyPrefix string
-		redis     redis2.Client
+		redis     rdb.Client
 	}
 	type args struct {
 		key string
@@ -278,14 +278,14 @@ func TestRedisSchedulerStore_getPayloadKey(t *testing.T) {
 func TestRedisSchedulerStore_Remove(t *testing.T) {
 	type fields struct {
 		keyPrefix string
-		redis     redis2.Client
+		redis     rdb.Client
 	}
 	type args struct {
 		schedulerEntry entry.SchedulerEntry
 		time           int64
 		partitionNum   int64
 	}
-	f := fields{keyPrefix: "test_prefix", redis: redis2.Client{}}
+	f := fields{keyPrefix: "test_prefix", redis: rdb.Client{}}
 	schedulerEntry := entry.NewDefaultSchedulerEntry("key", "payload")
 	entries := []entry.SchedulerEntry{schedulerEntry}
 	uTime := time.Now().UnixNano() / int64(time.Millisecond)

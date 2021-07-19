@@ -2,20 +2,20 @@ package ha_worker
 
 import (
 	"fmt"
-	"gronos/worker"
+	worker2 "gronosq/core/worker"
 	"sync"
 	"time"
 )
 
 type WorkerManager struct {
 	taskDistributor TaskDistributor
-	taskFactory     worker.TaskFactory
-	taskContext     *worker.TaskContext
-	managedTasks    []worker.Task
+	taskFactory     worker2.TaskFactory
+	taskContext     *worker2.TaskContext
+	managedTasks    []worker2.Task
 	mutex           sync.Mutex
 }
 
-func NewWorkerManager(taskDistributor TaskDistributor, taskFactory worker.TaskFactory, taskContext *worker.TaskContext) *WorkerManager {
+func NewWorkerManager(taskDistributor TaskDistributor, taskFactory worker2.TaskFactory, taskContext *worker2.TaskContext) *WorkerManager {
 	w := &WorkerManager{taskDistributor: taskDistributor, taskFactory: taskFactory, taskContext: taskContext}
 	w.taskDistributor.SetRestartAble(w)
 	return w
@@ -28,7 +28,7 @@ func (w *WorkerManager) Start() {
 	tasks := w.taskDistributor.GetTasks()
 	fmt.Println("Task ids ", tasks)
 	if len(tasks) > 0 {
-		w.managedTasks = []worker.Task{}
+		w.managedTasks = []worker2.Task{}
 		for _, task := range tasks {
 			partitionNum := task
 			task := w.taskFactory.GetTask(*w.taskContext, int64(partitionNum))

@@ -1,10 +1,10 @@
 commonConfig:
-  prefix: "gronos"
+  prefix: "gronosq"
   batchSize: 100
 kafkaConfig:
   brokers: "localhost"
-  topic: "ktopic-gronos"
-  group: "kgroup-gronos"
+  topic: "ktopic-gronosq"
+  group: "kgroup-gronosq"
 zooKeeperConfig:
   servers: "localhost:2181"
   zkPath: "/ha-nodes"

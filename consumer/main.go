@@ -1,10 +1,9 @@
-package main
+package consumer
 
 import (
 	"fmt"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
-	"gronos/config"
-	kConsumer "gronos/consumer"
+	"gronosq/config"
 )
 
 func main() {
@@ -24,7 +23,7 @@ func consume() {
 		"group.id":           configuration.KafkaConfig.Group,
 		"session.timeout.ms": 6000,
 		"auto.offset.reset":  "earliest"})
-	kafkaConsumer := kConsumer.NewKafkaConsumer(consumer)
+	kafkaConsumer := NewKafkaConsumer(consumer)
 	topics := []string{configuration.KafkaConfig.Topic}
 	kafkaConsumer.Subscribe(topics)
 }
