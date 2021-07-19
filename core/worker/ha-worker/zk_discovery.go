@@ -3,7 +3,7 @@ package ha_worker
 import (
 	"github.com/samuel/go-zookeeper/zk"
 	log "github.com/sirupsen/logrus"
-	zkClient "gronos/core/zk"
+	zkClient "gronosq/core/zk"
 )
 
 type ZKDiscovery struct {

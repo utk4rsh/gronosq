@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = "gronosq/server/pb";
+
+package server;
+
+service Scheduler {
+  rpc Add (SchedulerEntryRequest) returns (SchedulerResponse) {}
+  rpc Remove (SchedulerEntryRequest) returns (SchedulerResponse) {}
+}
+
+message SchedulerEntryRequest {
+  string key = 1;
+  string payload = 2;
+}
+
+message SchedulerResponse {
+  string message = 1;
+}

@@ -2,7 +2,7 @@ package rdb
 
 import (
 	"github.com/go-redis/redis/v8"
-	"gronos/config"
+	"gronosq/config"
 )
 
 type Client struct {
