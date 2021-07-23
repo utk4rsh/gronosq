@@ -1,4 +1,4 @@
-module gronos
+module gronosq
 
 go 1.15
 

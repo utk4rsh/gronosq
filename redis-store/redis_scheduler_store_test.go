@@ -1,8 +1,8 @@
 package redis_store
 
 import (
-	"gronos/core/entry"
-	redis2 "gronos/core/rdb"
+	"gronosq/core/entry"
+	redis2 "gronosq/core/rdb"
 	"reflect"
 	"strconv"
 	"testing"

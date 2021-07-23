@@ -1,7 +1,7 @@
 package store
 
 import (
-	"gronos/core/entry"
+	"gronosq/core/entry"
 )
 
 type SchedulerStore interface {

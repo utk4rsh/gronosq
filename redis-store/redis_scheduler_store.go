@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"gronos/core/entry"
+	"gronosq/core/entry"
 	"strconv"
 )
 

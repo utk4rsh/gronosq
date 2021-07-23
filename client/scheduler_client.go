@@ -1,10 +1,10 @@
 package client
 
 import (
-	"gronos/core/bucket"
-	"gronos/core/entry"
-	"gronos/core/partition"
-	"gronos/core/store"
+	"gronosq/core/bucket"
+	"gronosq/core/entry"
+	"gronosq/core/partition"
+	"gronosq/core/store"
 )
 
 const DatastoreNoOperation = 0
