@@ -2,7 +2,7 @@ package sink
 
 import (
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
-	"gronos/core/entry"
+	"gronosq/core/entry"
 )
 
 type SchedulerSink interface {

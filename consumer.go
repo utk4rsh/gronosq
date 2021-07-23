@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
-	"gronos/config"
-	kConsumer "gronos/consumer"
+	"gronosq/config"
+	kConsumer "gronosq/consumer"
 )
 
 func main() {

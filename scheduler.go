@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"gronos/client"
-	"gronos/config"
-	"gronos/core/bucket"
-	"gronos/core/entry"
-	"gronos/core/partition"
-	"gronos/core/rdb"
-	redisStore "gronos/redis-store"
+	"gronosq/client"
+	"gronosq/config"
+	"gronosq/core/bucket"
+	"gronosq/core/entry"
+	"gronosq/core/partition"
+	"gronosq/core/rdb"
+	redisStore "gronosq/redis-store"
 	"time"
 )
 

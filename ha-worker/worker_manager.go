@@ -2,7 +2,7 @@ package ha_worker
 
 import (
 	"fmt"
-	"gronos/worker"
+	"gronosq/worker"
 	"sync"
 	"time"
 )

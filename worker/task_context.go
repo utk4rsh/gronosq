@@ -1,10 +1,10 @@
 package worker
 
 import (
-	"gronos/core/bucket"
-	"gronos/core/checkpoint"
-	"gronos/core/sink"
-	"gronos/core/store"
+	"gronosq/core/bucket"
+	"gronosq/core/checkpoint"
+	"gronosq/core/sink"
+	"gronosq/core/store"
 )
 
 type TaskContext struct {
