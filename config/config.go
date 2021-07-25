@@ -5,7 +5,7 @@ type Configuration struct {
 	CommonConfig struct {
 		Prefix    string `yaml:"prefix"`
 		BatchSize int    `yaml:"batchSize"`
-	}`yaml:"commonConfig"`
+	} `yaml:"commonConfig"`
 	KafkaConfig struct {
 		Brokers string `yaml:"brokers"`
 		Topic   string `yaml:"topic"`
@@ -20,4 +20,15 @@ type Configuration struct {
 		Password string `yaml:"password"`
 		Database int    `yaml:"database"`
 	} `yaml:"redisConfig"`
+	Partitions        int64 `yaml:"partitions"`
+	SecondsForABucket int64 `yaml:"secondsForABucket"`
+}
+
+func Get() *Configuration {
+	configPath := "config.yaml"
+	configuration, err := NewReader().Read(configPath)
+	if err != nil {
+		panic(err)
+	}
+	return configuration
 }

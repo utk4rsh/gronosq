@@ -7,31 +7,31 @@ import (
 	"gronosq/core/store"
 )
 
-type SchedulerClient struct {
+type Scheduler struct {
 	store       store.SchedulerStore
 	timeBucket  bucket.TimeBucket
 	partitioner partition.Partitioner
 }
 
-func NewSchedulerClient(store store.SchedulerStore, timeBucket bucket.TimeBucket, partitioner partition.Partitioner) *SchedulerClient {
-	return &SchedulerClient{store: store, timeBucket: timeBucket, partitioner: partitioner}
+func NewScheduler(store store.SchedulerStore, timeBucket bucket.TimeBucket, partitioner partition.Partitioner) *Scheduler {
+	return &Scheduler{store: store, timeBucket: timeBucket, partitioner: partitioner}
 }
 
-func (s *SchedulerClient) Remove(entry entry.SchedulerEntry, time int64) (bool, error) {
+func (s *Scheduler) Remove(entry entry.SchedulerEntry, time int64) (bool, error) {
 	key := entry.Key()
 	partitionNumber := s.partitioner.Partition(key)
 	storeResult, err := s.store.Remove(entry, s.timeBucket.ToBucket(time), partitionNumber)
 	return storeResult, err
 }
 
-func (s *SchedulerClient) Add(entry entry.SchedulerEntry, time int64) (string, error) {
+func (s *Scheduler) Add(entry entry.SchedulerEntry, time int64) (string, error) {
 	key := entry.Key()
 	partitionNumber := s.partitioner.Partition(key)
 	storeResult, err := s.store.Add(entry, s.timeBucket.ToBucket(time), partitionNumber)
 	return storeResult, err
 }
 
-func (s *SchedulerClient) Update(entry entry.SchedulerEntry, oldTime int64, newTime int64) (bool, error) {
+func (s *Scheduler) Update(entry entry.SchedulerEntry, oldTime int64, newTime int64) (bool, error) {
 	key := entry.Key()
 	partitionNumber := s.partitioner.Partition(key)
 	storeResult, err := s.store.Update(entry, s.timeBucket.ToBucket(oldTime), s.timeBucket.ToBucket(newTime), partitionNumber)

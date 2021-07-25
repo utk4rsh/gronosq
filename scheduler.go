@@ -3,7 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"gronosq/client"
+	"gronosq/core/client"
+
 	"gronosq/config"
 	"gronosq/core/bucket"
 	"gronosq/core/entry"

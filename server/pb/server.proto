@@ -12,6 +12,7 @@ service Scheduler {
 message SchedulerEntryRequest {
   string key = 1;
   string payload = 2;
+  int64 scheduledTimeEpoch = 3;
 }
 
 message SchedulerResponse {

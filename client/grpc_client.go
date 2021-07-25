@@ -14,12 +14,10 @@ import (
 )
 
 const (
-	address     = "127.0.0.1:62008"
-	defaultName = "world"
+	serviceName = "gronosq-server"
 )
 
 func main() {
-	serviceName := "example"
 	logger := zap.NewNop()
 	dispatcherConfig, err := utils.NewDispatcherConfig(serviceName)
 	clientDispatcher, err := utils.NewClientDispatcher(utils.TransportTypeGRPC, dispatcherConfig, logger)
