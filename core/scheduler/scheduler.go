@@ -1,4 +1,4 @@
-package client
+package scheduler
 
 import (
 	"gronosq/core/bucket"

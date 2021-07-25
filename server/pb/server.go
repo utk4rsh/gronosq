@@ -4,16 +4,16 @@ import (
 	"context"
 	"gronosq/config"
 	"gronosq/core/bucket"
-	"gronosq/core/client"
 	"gronosq/core/entry"
 	"gronosq/core/partition"
 	"gronosq/core/rdb"
+	"gronosq/core/scheduler"
 	redisStore "gronosq/core/store/redis-store"
 	"strconv"
 )
 
 type SchedulerServerInstance struct {
-	scheduler *client.Scheduler
+	scheduler *scheduler.Scheduler
 }
 
 func NewSchedulerServerInstance(configuration *config.Configuration) *SchedulerServerInstance {
@@ -22,7 +22,7 @@ func NewSchedulerServerInstance(configuration *config.Configuration) *SchedulerS
 	schedulerStore := redisStore.NewRedisSchedulerStore(configuration.CommonConfig.Prefix, redisClient)
 	timeBucket := bucket.NewSecondGroupedTimeBucket(configuration.SecondsForABucket)
 	partitioner := partition.NewRandomPartitioner(configuration.Partitions)
-	return &SchedulerServerInstance{scheduler: client.NewScheduler(schedulerStore, timeBucket, partitioner)}
+	return &SchedulerServerInstance{scheduler: scheduler.NewScheduler(schedulerStore, timeBucket, partitioner)}
 }
 
 func (s *SchedulerServerInstance) Add(ctx context.Context, request *SchedulerEntryRequest) (*SchedulerResponse, error) {
